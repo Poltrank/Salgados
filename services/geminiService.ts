@@ -1,6 +1,21 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-const apiKey = process.env.API_KEY || ''; // Ensure fallback to empty string if undefined to avoid crash on init, though actual call will fail if missing.
+// Função segura para obter a API Key sem quebrar o site se o ambiente não tiver suporte a process.env
+const getApiKey = () => {
+  try {
+    // Verifica se process existe antes de tentar acessar
+    // @ts-ignore
+    if (typeof process !== 'undefined' && process.env) {
+      // @ts-ignore
+      return process.env.API_KEY || '';
+    }
+  } catch (e) {
+    console.warn("Ambiente não suporta process.env diretamente");
+  }
+  return '';
+};
+
+const apiKey = getApiKey();
 const ai = new GoogleGenAI({ apiKey });
 
 export const getPartySuggestion = async (
@@ -9,8 +24,10 @@ export const getPartySuggestion = async (
   durationHours: number
 ): Promise<{ text: string; recommendedAmount: number } | null> => {
   
+  // Se não tiver chave configurada, retorna erro silencioso para não travar
   if (!apiKey) {
-    console.error("API Key is missing");
+    console.error("API Key não configurada no ambiente. A IA não responderá.");
+    // Retornar um mock ou null
     return null;
   }
 
