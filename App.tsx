@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Phone, Star, Plus, Minus, Trash2, Menu as MenuIcon, Sparkles, ChefHat, Flame, Clock, Package, Lock, Pencil, LogOut, RefreshCw, CheckCircle } from 'lucide-react';
+import { ShoppingCart, Phone, Star, Plus, Minus, Trash2, Menu as MenuIcon, Sparkles, ChefHat, Flame, Clock, Package, Lock, Pencil, LogOut, RefreshCw, CheckCircle, Save } from 'lucide-react';
 import { WHATSAPP_NUMBER } from './constants';
 import { Product, CartItem, Category } from './types';
 import { PartyPlanner } from './components/PartyPlanner';
 import { storageService } from './services/storage';
 import { AdminLogin } from './components/AdminLogin';
 import { ProductEditor } from './components/ProductEditor';
+import { DataExport } from './components/DataExport';
 
 const App = () => {
   // Application State
@@ -23,9 +24,10 @@ const App = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   // URL DA LOGO
-  const LOGO_URL = "https://placehold.co/400x400/white/DC2626?text=Sr.+Chef%C3%A3o+Logo"; 
+  const LOGO_URL = "https://i.postimg.cc/cJyryrPM/472886584-939984911092828-6065219960571241364-n.jpg"; 
 
   // Initial Load
   useEffect(() => {
@@ -114,17 +116,26 @@ const App = () => {
         onClose={() => setEditingProduct(null)} 
         onSave={handleSaveProduct} 
       />
+      <DataExport isOpen={isExportOpen} onClose={() => setIsExportOpen(false)} />
 
       {/* Admin Bar (Visible only when logged in) */}
       {isAdmin && (
         <div className="bg-brand-dark text-white text-xs py-2 px-4 fixed top-0 w-full z-50 flex justify-between items-center shadow-lg">
           <div className="flex items-center gap-2">
              <span className="bg-green-500 w-2 h-2 rounded-full animate-pulse"></span>
-             <span className="font-bold">MODO ADMINISTRADOR (Edite os produtos clicando neles)</span>
+             <span className="font-bold hidden sm:inline">MODO ADMINISTRADOR (Edite os produtos clicando neles)</span>
+             <span className="font-bold sm:hidden">MODO ADM</span>
           </div>
-          <div className="flex gap-4">
+          <div className="flex gap-2 sm:gap-4">
+             <button 
+              onClick={() => setIsExportOpen(true)}
+              className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded flex items-center gap-1 transition font-bold"
+             >
+                <Save size={14} /> <span className="hidden sm:inline">Salvar Definitivo</span><span className="sm:hidden">Salvar</span>
+             </button>
+
              <button onClick={handleResetProducts} className="hover:text-red-400 flex items-center gap-1">
-                <RefreshCw size={12} /> Restaurar Padrão
+                <RefreshCw size={12} /> <span className="hidden sm:inline">Restaurar Padrão</span>
              </button>
              <button onClick={() => setIsAdmin(false)} className="hover:text-gray-300 flex items-center gap-1">
                 <LogOut size={12} /> Sair
@@ -134,7 +145,7 @@ const App = () => {
       )}
 
       {/* Navigation */}
-      <nav className={`fixed ${isAdmin ? 'top-8' : 'top-0'} w-full z-40 transition-all duration-300 ${isScrolled ? 'bg-white shadow-lg py-2' : 'bg-transparent py-4'}`}>
+      <nav className={`fixed ${isAdmin ? 'top-10' : 'top-0'} w-full z-40 transition-all duration-300 ${isScrolled ? 'bg-white shadow-lg py-2' : 'bg-transparent py-4'}`}>
         <div className="container mx-auto px-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center overflow-hidden border-2 border-brand-red shadow-md">
@@ -175,7 +186,7 @@ const App = () => {
       </nav>
 
       {/* Hero Section */}
-      <header className={`relative h-[550px] md:h-[650px] flex items-center justify-center overflow-hidden ${isAdmin ? 'mt-8' : ''}`}>
+      <header className={`relative h-[550px] md:h-[650px] flex items-center justify-center overflow-hidden ${isAdmin ? 'mt-10' : ''}`}>
         <div className="absolute inset-0 bg-gradient-to-b from-[#EA580C] to-[#DC2626] z-0"></div>
         
         <div className="absolute top-1/4 left-10 text-brand-yellow opacity-20 transform -rotate-12">
