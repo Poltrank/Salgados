@@ -1,36 +1,27 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-// Removemos a inicialização global que travava o site
-// A conexão com a IA agora só acontece quando o usuário clica no botão
-
 export const getPartySuggestion = async (
   guestCount: number,
   partyType: string,
   durationHours: number
 ): Promise<{ text: string; recommendedAmount: number } | null> => {
   
-  let apiKey = '';
+  // @ts-ignore
+  const apiKey = process.env.API_KEY;
 
-  // 1. Tentativa Segura de pegar a chave
+  // Se não tiver chave, aborta silenciosamente sem travar o site
+  if (!apiKey) {
+    console.warn("API Key não configurada. A IA não será executada.");
+    // Retornamos um fallback simples para o usuário não ficar sem resposta se a IA falhar por falta de chave
+    return {
+      text: "Não conseguimos conectar com o Assistente IA no momento. Como regra geral, recomendamos calcular de 12 a 15 salgados por pessoa para uma festa de 4 horas.",
+      recommendedAmount: guestCount * 15
+    };
+  }
+
   try {
     // @ts-ignore
-    if (typeof process !== 'undefined' && process.env) {
-      // @ts-ignore
-      apiKey = process.env.API_KEY || '';
-    }
-  } catch (e) {
-    console.warn("Ambiente sem suporte a variaveis de processo");
-  }
-
-  // 2. Se não tiver chave, aborta silenciosamente sem travar o site
-  if (!apiKey) {
-    console.error("API Key não configurada. A IA não será executada.");
-    return null;
-  }
-
-  try {
-    // 3. Inicializa a IA somente no momento do clique
-    const ai = new GoogleGenAI({ apiKey });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
