@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Product } from '../types';
+import { Product, Category } from '../types';
 import { Save, X, Image as ImageIcon, ExternalLink, AlertTriangle, CheckCircle } from 'lucide-react';
 
 interface ProductEditorProps {
@@ -39,7 +39,9 @@ export const ProductEditor: React.FC<ProductEditorProps> = ({ product, isOpen, o
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
         <div className="bg-gray-100 p-4 border-b border-gray-200 flex justify-between items-center">
-          <h3 className="font-heading font-bold text-lg text-gray-800">Editar Produto</h3>
+          <h3 className="font-heading font-bold text-lg text-gray-800">
+             {product?.id.length > 5 ? 'Novo Produto' : 'Editar Produto'}
+          </h3>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
             <X size={24} />
           </button>
@@ -51,12 +53,19 @@ export const ProductEditor: React.FC<ProductEditorProps> = ({ product, isOpen, o
           <div className="flex flex-col items-center mb-4">
             <span className="text-xs font-bold text-gray-500 uppercase mb-2 self-start">Como vai ficar no site:</span>
             <div className="w-full h-48 rounded-xl overflow-hidden border-4 border-gray-100 relative bg-gray-50 shadow-inner">
-              <img 
-                src={formData.image} 
-                alt="Preview" 
-                className="w-full h-full object-cover" 
-                onError={(e) => (e.currentTarget.src = 'https://placehold.co/600x400?text=Link+Quebrado+ou+Inválido')} 
-              />
+              {formData.image ? (
+                  <img 
+                  src={formData.image} 
+                  alt="Preview" 
+                  className="w-full h-full object-cover" 
+                  onError={(e) => (e.currentTarget.src = 'https://placehold.co/600x400?text=Link+Quebrado')} 
+                  />
+              ) : (
+                  <div className="flex items-center justify-center h-full text-gray-400 font-bold">
+                      Sem imagem
+                  </div>
+              )}
+              
               {hasError && (
                 <div className="absolute inset-0 bg-red-500/80 flex items-center justify-center text-white font-bold text-center p-4">
                   Link Inválido!<br/>A imagem não vai aparecer.
@@ -113,14 +122,16 @@ export const ProductEditor: React.FC<ProductEditorProps> = ({ product, isOpen, o
                 />
             </div>
             <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Qtd/Descrição Curta</label>
-                <input 
-                type="text" 
-                value={formData.servingSize || ''}
-                onChange={(e) => handleChange('servingSize', e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:border-brand-orange focus:outline-none"
-                placeholder="Ex: 100 unidades"
-                />
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Categoria</label>
+                <select 
+                    value={formData.category} 
+                    onChange={(e) => handleChange('category', e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:border-brand-orange focus:outline-none bg-white"
+                >
+                    {Object.values(Category).map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                </select>
             </div>
           </div>
 
@@ -143,6 +154,17 @@ export const ProductEditor: React.FC<ProductEditorProps> = ({ product, isOpen, o
               className="w-full p-2 border border-gray-300 rounded-lg focus:border-brand-orange focus:outline-none"
             />
           </div>
+          
+           <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Quantidade/Porção (Texto)</label>
+                <input 
+                type="text" 
+                value={formData.servingSize || ''}
+                onChange={(e) => handleChange('servingSize', e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:border-brand-orange focus:outline-none"
+                placeholder="Ex: 100 unidades"
+                />
+            </div>
 
         </div>
 

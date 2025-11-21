@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Phone, Star, Plus, Minus, Trash2, Menu as MenuIcon, Sparkles, ChefHat, Flame, Clock, Package, Lock, Pencil, LogOut, RefreshCw, CheckCircle, Save } from 'lucide-react';
+import { ShoppingCart, Phone, Star, Plus, Minus, Trash2, Menu as MenuIcon, Sparkles, ChefHat, Flame, Clock, Package, Lock, Pencil, LogOut, RefreshCw, CheckCircle, Save, PlusCircle, ArrowLeft } from 'lucide-react';
 import { WHATSAPP_NUMBER } from './constants';
 import { Product, CartItem, Category } from './types';
 import { storageService } from './services/storage';
@@ -71,10 +71,37 @@ const App = () => {
   };
 
   // Admin Logic
+  const handleCreateProduct = () => {
+    const newId = Date.now().toString();
+    setEditingProduct({
+        id: newId,
+        name: 'Novo Salgado',
+        description: 'Descrição deliciosa aqui...',
+        price: 0,
+        category: Category.FRITOS,
+        image: '',
+        servingSize: '100 unidades',
+        popular: false
+    });
+  };
+
   const handleSaveProduct = (updatedProduct: Product) => {
-    const newProducts = products.map(p => p.id === updatedProduct.id ? updatedProduct : p);
-    setProducts(newProducts);
-    storageService.saveProducts(newProducts);
+    setProducts(prevProducts => {
+        const exists = prevProducts.find(p => p.id === updatedProduct.id);
+        let newProducts;
+        
+        if (exists) {
+            // Atualizar existente
+            newProducts = prevProducts.map(p => p.id === updatedProduct.id ? updatedProduct : p);
+        } else {
+            // Criar novo
+            newProducts = [...prevProducts, updatedProduct];
+        }
+        
+        storageService.saveProducts(newProducts);
+        return newProducts;
+    });
+
     setEditingProduct(null);
     
     // Show Success Toast
@@ -101,7 +128,7 @@ const App = () => {
       {showSuccessToast && (
         <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-full shadow-2xl z-[100] flex items-center gap-2 animate-bounce">
           <CheckCircle size={20} />
-          <span className="font-bold">Produto Atualizado com Sucesso!</span>
+          <span className="font-bold">Salvo com Sucesso!</span>
         </div>
       )}
 
@@ -120,19 +147,26 @@ const App = () => {
         <div className="bg-brand-dark text-white text-xs py-2 px-4 fixed top-0 w-full z-50 flex justify-between items-center shadow-lg">
           <div className="flex items-center gap-2">
              <span className="bg-green-500 w-2 h-2 rounded-full animate-pulse"></span>
-             <span className="font-bold hidden sm:inline">MODO ADMINISTRADOR (Edite os produtos clicando neles)</span>
-             <span className="font-bold sm:hidden">MODO ADM</span>
+             <span className="font-bold hidden sm:inline">MODO ADM (Clique nos produtos para editar)</span>
+             <span className="font-bold sm:hidden">ADM ON</span>
           </div>
-          <div className="flex gap-2 sm:gap-4">
+          <div className="flex gap-2 sm:gap-4 items-center">
+             <button 
+                onClick={handleCreateProduct}
+                className="bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded flex items-center gap-1 transition font-bold animate-pulse"
+             >
+                <PlusCircle size={14} /> <span className="hidden sm:inline">Novo Produto</span><span className="sm:hidden">Novo</span>
+             </button>
+
              <button 
               onClick={() => setIsExportOpen(true)}
               className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded flex items-center gap-1 transition font-bold"
              >
-                <Save size={14} /> <span className="hidden sm:inline">Salvar Definitivo</span><span className="sm:hidden">Salvar</span>
+                <Save size={14} /> <span className="hidden sm:inline">Salvar Definitivo</span>
              </button>
 
-             <button onClick={handleResetProducts} className="hover:text-red-400 flex items-center gap-1">
-                <RefreshCw size={12} /> <span className="hidden sm:inline">Restaurar Padrão</span>
+             <button onClick={handleResetProducts} className="hover:text-red-400 flex items-center gap-1" title="Resetar">
+                <RefreshCw size={12} />
              </button>
              <button onClick={() => setIsAdmin(false)} className="hover:text-gray-300 flex items-center gap-1">
                 <LogOut size={12} /> Sair
@@ -471,13 +505,25 @@ const App = () => {
                     R$ {cartTotal.toFixed(2)}
                   </span>
                 </div>
-                <button 
-                  onClick={handleCheckout}
-                  className="w-full bg-[#25D366] hover:bg-green-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg transition flex items-center justify-center gap-2 transform active:scale-95"
-                >
-                  <Phone size={24} />
-                  Finalizar no WhatsApp
-                </button>
+                
+                <div className="space-y-3">
+                    <button 
+                        onClick={handleCheckout}
+                        className="w-full bg-[#25D366] hover:bg-green-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg transition flex items-center justify-center gap-2 transform active:scale-95"
+                    >
+                        <Phone size={24} />
+                        Finalizar no WhatsApp
+                    </button>
+
+                    <button 
+                        onClick={() => setIsCartOpen(false)}
+                        className="w-full bg-white border-2 border-brand-orange text-brand-orange hover:bg-orange-50 py-3 rounded-xl font-bold text-base transition flex items-center justify-center gap-2"
+                    >
+                        <ArrowLeft size={20} />
+                        Adicionar mais itens
+                    </button>
+                </div>
+
                 <p className="text-center text-xs text-gray-400 mt-3">
                   O pedido será enviado para o Sr. Chefão confirmar.
                 </p>
