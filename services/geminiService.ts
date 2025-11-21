@@ -1,22 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-// Função segura para obter a API Key sem quebrar o site se o ambiente não tiver suporte a process.env
-const getApiKey = () => {
-  try {
-    // Verifica se process existe antes de tentar acessar
-    // @ts-ignore
-    if (typeof process !== 'undefined' && process.env) {
-      // @ts-ignore
-      return process.env.API_KEY || '';
-    }
-  } catch (e) {
-    console.warn("Ambiente não suporta process.env diretamente");
-  }
-  return '';
-};
-
-const apiKey = getApiKey();
-const ai = new GoogleGenAI({ apiKey });
+// Removemos a inicialização global que travava o site
+// A conexão com a IA agora só acontece quando o usuário clica no botão
 
 export const getPartySuggestion = async (
   guestCount: number,
@@ -24,14 +9,29 @@ export const getPartySuggestion = async (
   durationHours: number
 ): Promise<{ text: string; recommendedAmount: number } | null> => {
   
-  // Se não tiver chave configurada, retorna erro silencioso para não travar
+  let apiKey = '';
+
+  // 1. Tentativa Segura de pegar a chave
+  try {
+    // @ts-ignore
+    if (typeof process !== 'undefined' && process.env) {
+      // @ts-ignore
+      apiKey = process.env.API_KEY || '';
+    }
+  } catch (e) {
+    console.warn("Ambiente sem suporte a variaveis de processo");
+  }
+
+  // 2. Se não tiver chave, aborta silenciosamente sem travar o site
   if (!apiKey) {
-    console.error("API Key não configurada no ambiente. A IA não responderá.");
-    // Retornar um mock ou null
+    console.error("API Key não configurada. A IA não será executada.");
     return null;
   }
 
   try {
+    // 3. Inicializa a IA somente no momento do clique
+    const ai = new GoogleGenAI({ apiKey });
+
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: `I am planning a party. 
