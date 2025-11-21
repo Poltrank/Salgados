@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { ShoppingCart, Phone, Star, Plus, Minus, Trash2, Menu as MenuIcon, Sparkles, ChefHat, Flame, Clock, Package, Lock, Pencil, LogOut, RefreshCw, CheckCircle, Save } from 'lucide-react';
 import { WHATSAPP_NUMBER } from './constants';
 import { Product, CartItem, Category } from './types';
-import { PartyPlanner } from './components/PartyPlanner';
 import { storageService } from './services/storage';
 import { AdminLogin } from './components/AdminLogin';
 import { ProductEditor } from './components/ProductEditor';
@@ -16,7 +15,6 @@ const App = () => {
   // UI State
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<Category | 'Todos'>('Todos');
-  const [isPlannerOpen, setIsPlannerOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
   // Admin State
@@ -108,7 +106,6 @@ const App = () => {
       )}
 
       {/* Modals */}
-      <PartyPlanner isOpen={isPlannerOpen} onClose={() => setIsPlannerOpen(false)} />
       <AdminLogin isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} onLogin={() => setIsAdmin(true)} />
       <ProductEditor 
         isOpen={!!editingProduct} 
@@ -162,14 +159,6 @@ const App = () => {
           </div>
           
           <div className="flex gap-3">
-             <button 
-              onClick={() => setIsPlannerOpen(true)}
-              className="bg-brand-yellow hover:bg-yellow-300 text-brand-red font-bold px-4 py-2 rounded-full shadow-md transition flex items-center gap-2 text-sm"
-            >
-              <Sparkles size={16} />
-              <span className="hidden md:inline">Calculadora de Festa</span>
-            </button>
-
             <button 
               onClick={() => setIsCartOpen(true)}
               className="relative bg-white text-brand-red p-2 rounded-full shadow-md hover:scale-105 transition"
